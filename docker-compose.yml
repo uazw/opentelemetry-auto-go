@@ -8,6 +8,7 @@ services:
       - "8080:8080"
     depends_on:
       - otel-collector
+    network_mode: "host"
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -17,6 +18,7 @@ services:
     ports:
       - "4317:4317"   # OTLP gRPC
       - "4318:4318"   # OTLP gRPC
+    network_mode: "host"
 
   # Go Auto-Instrumentation agent container that attaches to the app process
   otel-go-agent:
@@ -49,3 +51,4 @@ services:
       - /sys/kernel/debug:/sys/kernel/debug
       - /sys/fs/bpf:/sys/fs/bpf
       - /sys/kernel/tracing:/sys/kernel/tracing
+    network_mode: "host"

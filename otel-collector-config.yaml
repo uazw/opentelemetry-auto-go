@@ -7,17 +7,12 @@ receivers:
         endpoint: 0.0.0.0:4318
   prometheus_simple:
     collection_interval: 10s
-    endpoint: "host.docker.internal:8080"
+    endpoint: "localhost:8080"
     metrics_path: '/metrics'
     use_service_account: false
 exporters:
   debug:
     verbosity: detailed
-  # Prometheus exporter for scraping (optional)
-  prometheus:
-    endpoint: 0.0.0.0:8889
-  # OTLP to external backends can be added here
-
 processors:
   batch: {}
 
@@ -37,7 +32,7 @@ service:
       receivers: [prometheus_simple]
       processors: [batch]
       exporters: [debug]
-    # traces:
-    #   receivers: [otlp]
-    #   processors: [batch]
-    #   exporters: [debug]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]

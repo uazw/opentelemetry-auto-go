@@ -40,3 +40,7 @@ The app can run standalone without telemetry: `go run ./cmd/server`. Auto-instru
 - The auto-instrumentation agent container joins the app container's PID namespace to attach and collect telemetry.
 - This setup typically requires Linux; Docker Desktop on macOS/Windows may not support the required kernel features.
 - Pin images for reproducibility if desired (collector and agent).
+
+
+## Related Doc
+[auto-go](https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/getting-started.md)

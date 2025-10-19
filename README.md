@@ -13,13 +13,14 @@ This repo contains a simple Go web server and a Docker Compose setup that uses O
 2. Generate traffic:
    ```
    curl http://localhost:8080/
+   curl http://localhost:8080/hello
    ```
 3. Observe telemetry:
    - Collector logs (metrics and traces): `docker compose logs -f otel-collector`
    - Prometheus metrics endpoint from collector: `http://localhost:8889/metrics`
 
 ## Project Structure
-- `cmd/server/main.go` – Minimal Go web server (no manual OTEL code)
+- `cmd/server/main.go` – GoFrame web server with `/` and `/hello`
 - `Dockerfile` – Multi-stage build for the app image
 - `docker-compose.yml` – Brings up app, OTEL Collector, and Go auto-instrumentation agent
 - `otel-collector-config.yaml` – Collector configuration (OTLP receiver, debug + Prometheus exporters, traces pipeline)

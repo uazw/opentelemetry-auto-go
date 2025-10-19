@@ -1,20 +1,23 @@
 package main
 
 import (
-    "log"
-    "net/http"
+    "github.com/gogf/gf/v2/frame/g"
+    "github.com/gogf/gf/v2/net/ghttp"
 )
 
 func main() {
-    mux := http.NewServeMux()
-    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-        _, _ = w.Write([]byte("hello from otel-go-webapp"))
+    s := g.Server()
+
+    // Root route for backward compatibility
+    s.BindHandler("/", func(r *ghttp.Request) {
+        r.Response.Write("hello from otel-go-webapp (goframe)")
     })
 
-    addr := ":8080"
-    log.Printf("starting server on %s", addr)
-    if err := http.ListenAndServe(addr, mux); err != nil {
-        log.Fatalf("server error: %v", err)
-    }
+    // Hello World endpoint
+    s.BindHandler("/hello", func(r *ghttp.Request) {
+        r.Response.Write("hello world")
+    })
+
+    s.SetPort(8080)
+    s.Run()
 }

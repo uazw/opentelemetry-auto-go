@@ -5,6 +5,11 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  prometheus_simple:
+    collection_interval: 10s
+    endpoint: "host.docker.internal:8080"
+    metrics_path: '/metrics'
+    use_service_account: false
 exporters:
   debug:
     verbosity: detailed
@@ -16,13 +21,23 @@ exporters:
 processors:
   batch: {}
 
+# service:
+#   telemetry:
+#     metrics:
+#       readers:
+#         - pull:
+#             exporter:
+#               prometheus:
+#                 host: "host.docker.internal"
+#                 port: 8080
+
 service:
   pipelines:
     metrics:
-      receivers: [otlp]
+      receivers: [prometheus_simple]
       processors: [batch]
       exporters: [debug]
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [debug]
+    # traces:
+    #   receivers: [otlp]
+    #   processors: [batch]
+    #   exporters: [debug]

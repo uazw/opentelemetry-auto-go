@@ -10,14 +10,13 @@ services:
       - otel-collector
 
   otel-collector:
-    image: otel/opentelemetry-collector:latest
+    image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     ports:
       - "4317:4317"   # OTLP gRPC
       - "4318:4318"   # OTLP gRPC
-      - "8889:8889"   # Prometheus metrics endpoint
 
   # Go Auto-Instrumentation agent container that attaches to the app process
   otel-go-agent:
@@ -39,7 +38,6 @@ services:
       # Signal-specific endpoints and protocols to avoid ambiguous defaults
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-      - OTEL_METRICS_EXPORTER=none
       - OTEL_SERVICE_NAME=otel-go-webapp
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=dev
       - OTEL_GO_AUTO_INSTRUMENTATION_HTTP_ENABLED=true

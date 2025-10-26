@@ -14,7 +14,15 @@ exporters:
   debug:
     verbosity: detailed
 processors:
+
   batch: {}
+  filter/ottl:
+    metrics:
+      datapoint:
+        - attributes["http_route"] == "/metrics"      
+    traces:
+      span:
+        - attributes["url.path"] == "/metrics"
 
 # service:
 #   telemetry:
@@ -30,9 +38,9 @@ service:
   pipelines:
     metrics:
       receivers: [prometheus_simple]
-      processors: [batch]
+      processors: [filter/ottl, batch]
       exporters: [debug]
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [filter/ottl, batch]
       exporters: [debug]

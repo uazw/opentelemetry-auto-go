@@ -20,10 +20,31 @@ This repo contains a simple Go web server and a Docker Compose setup that uses O
    - App Prometheus metrics endpoint (scraped by the collector): `http://localhost:8080/metrics`
 
 ## Project Structure
-- `cmd/server/main.go` – GoFrame web server with `/` and `/hello`
+- `cmd/server/main.go` – GoFrame web server with `/`, `/hello`, and `/metrics`
 - `Dockerfile` – Multi-stage build for the app image
 - `docker-compose.yml` – Brings up app, OTEL Collector, and Go auto-instrumentation agent
 - `otel-collector-config.yaml` – Collector configuration (OTLP receiver, debug + Prometheus exporters, traces pipeline)
+
+## Manual Metrics (in App)
+This repo includes manual application metrics in addition to auto-instrumentation:
+
+- Prometheus exporter and OTEL metrics provider are initialized at startup so the app can expose metrics directly at `http://localhost:8080/metrics`.
+- A demo counter metric is created and incremented once at startup.
+- The `/metrics` endpoint is served by GoFrame's OTEL Prometheus handler and is scraped by the OpenTelemetry Collector.
+
+Key locations in code:
+
+- Exporter setup and provider: `cmd/server/main.go:23`–`cmd/server/main.go:45`
+- Counter creation: `cmd/server/main.go:26`–`cmd/server/main.go:37`
+- Counter increment: `cmd/server/main.go:59`
+- Metrics endpoint binding: `cmd/server/main.go:58`
+
+Extending manual metrics:
+
+- Increment the counter per request (e.g., inside each handler) or add histograms for latency and request size.
+- You can add attributes/labels by using metric instruments from the OTEL metrics API via GoFrame's `gmetric` provider.
+
+Note: Manual tracing is not implemented in this app. Traces observed in the Collector come from the Go auto-instrumentation agent. If you want manual spans, wire an OTLP trace exporter and use `otel.Tracer` in handlers.
 
 ## Configuration
 - Auto-instrumentation agent environment (see `docker-compose.yml` service `otel-go-agent`):

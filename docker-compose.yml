@@ -38,7 +38,7 @@ services:
       - PERFMON
     environment:
       # Signal-specific endpoints and protocols to avoid ambiguous defaults
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_SERVICE_NAME=otel-go-webapp
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=dev

@@ -45,3 +45,4 @@ The app can run standalone without telemetry: `go run ./cmd/server`. Auto-instru
 
 ## Related Doc
 [auto-go](https://github.com/open-telemetry/opentelemetry-go-instrumentation/blob/main/docs/getting-started.md)
+[how-to-mix-manual-and-auto](https://goframe.org/en/docs/obs/metrics-builtin)

@@ -4,6 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gmetric"
 	"github.com/prometheus/otlptranslator"
 
@@ -19,8 +20,8 @@ const (
 
 func main() {
 	var ctx = gctx.New()
+	glog.SetDefaultHandler(LoggingJsonHandler)
 
-	// Prometheus exporter to export metrics as Prometheus format.
 	exporter, _ := prometheus.New(prometheus.WithTranslationStrategy(otlptranslator.UnderscoreEscapingWithSuffixes))
 
 	var (
@@ -49,10 +50,12 @@ func main() {
 	s := g.Server()
 	// Root route for backward compatibility
 	s.BindHandler("/", func(r *ghttp.Request) {
+		g.Log().Info(r.Context(), "helworld")
 		r.Response.Write("hello from otel-go-webapp (goframe)")
 	})
 	// Hello World endpoint
 	s.BindHandler("/hello", func(r *ghttp.Request) {
+        g.Log().Info(r.Context(), "helworldworld")
 		r.Response.Write("hello world")
 	})
 	s.BindHandler("/metrics", otelmetric.PrometheusHandler)

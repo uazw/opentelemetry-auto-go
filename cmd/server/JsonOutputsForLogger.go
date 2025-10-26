@@ -7,15 +7,12 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 )
 
-// JsonOutputsForLogger is for JSON marshaling in sequence.
 type HandlerOutputJson struct {
-	Timestamp  string `json:"timestamp"`                                      // Formatted time string, like "2016-01-09 12:00:00".
-	TraceId    string `json:"logging.googleapis.com/trace,omitempty"`         // Trace id, only available if tracing is enabled.
-	Sampled    bool   `json:"logging.googleapis.com/trace_sampled,omitempty"` // Trace id, only available if tracing is enabled.
-	Level      string `json:"severity"`                                       // Formatted level string, like "DEBU", "ERRO", etc. Eg: ERRO
-	CallerPath string `json:"callerPath,omitempty"`                           // The source file path and its line number that calls logging, only available if F_FILE_SHORT or F_FILE_LONG set.
-	CallerFunc string `json:"callerFunc,omitempty"`                           // The source function name that calls logging, only available if F_CALLER_FN set.
-	Content    string `json:"message"`                                        // Content is the main logging content, containing error stack string produced by logger.
+	Timestamp      string         `json:"timestamp"`                                      // Formatted time string, like "2016-01-09 12:00:00".
+	TraceId        string         `json:"logging.googleapis.com/trace,omitempty"`         // Trace id, only available if tracing is enabled.
+	Sampled        bool           `json:"logging.googleapis.com/trace_sampled,omitempty"` // Trace id, only available if tracing is enabled.
+	Level          string         `json:"severity"`                                       // Formatted level string, like "DEBU", "ERRO", etc. Eg: ERRO
+	Content        string         `json:"message"`                                        // Content is the main logging content, containing error stack string produced by logger.
 }
 
 func levelMapping(original string) string {
@@ -33,13 +30,15 @@ func levelMapping(original string) string {
 
 // LoggingJsonHandler is a example handler for logging JSON format content.
 var LoggingJsonHandler glog.Handler = func(ctx context.Context, in *glog.HandlerInput) {
+	sampled := true
+	if in.TraceId == "" {
+		sampled = false
+	}
 	output := HandlerOutputJson{
 		Timestamp:  in.TimeFormat,
 		TraceId:    in.TraceId,
-		Sampled:    true,
+		Sampled:    sampled,
 		Level:      levelMapping(in.LevelFormat),
-		CallerFunc: in.CallerFunc,
-		CallerPath: in.CallerPath,
 		Content:    in.Content,
 	}
 	if len(in.Values) > 0 {

@@ -55,7 +55,7 @@ func main() {
 	})
 	// Hello World endpoint
 	s.BindHandler("/hello", func(r *ghttp.Request) {
-        g.Log().Info(r.Context(), "helworldworld")
+		g.Log().Info(r.Context(), "helworldworld")
 		r.Response.Write("hello world")
 	})
 	s.BindHandler("/metrics", otelmetric.PrometheusHandler)

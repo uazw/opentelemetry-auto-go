@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/glog"
-	"github.com/gogf/gf/v2/os/gmetric"
 	"github.com/prometheus/otlptranslator"
 
 	"go.opentelemetry.io/otel/exporters/prometheus"
@@ -20,28 +19,15 @@ const (
 
 func main() {
 	var ctx = gctx.New()
+	// Set custom JSON logging handler to match google structured logging format.
 	glog.SetDefaultHandler(LoggingJsonHandler)
 
+	// Set up OpenTelemetry Prometheus exporter to export metric as prometheus format.
 	exporter, _ := prometheus.New(prometheus.WithTranslationStrategy(otlptranslator.UnderscoreEscapingWithSuffixes))
-
-	var (
-		meter = gmetric.GetGlobalProvider().Meter(gmetric.MeterOption{
-			Instrument:        instrument,
-			InstrumentVersion: instrumentVersion,
-		})
-		counter = meter.MustCounter(
-			"goframe.metric.demo.counter",
-			gmetric.MetricOption{
-				Help: "This is a simple demo for Counter usage",
-				Unit: "bytes",
-			},
-		)
-	)
-
-	// OpenTelemetry provider.
 	provider := otelmetric.MustProvider(
 		otelmetric.WithReader(exporter),
 	)
+
 	provider.SetAsGlobal()
 	defer provider.Shutdown(ctx)
 
@@ -58,8 +44,9 @@ func main() {
 		g.Log().Info(r.Context(), "helworldworld")
 		r.Response.Write("hello world")
 	})
+
+	// Prometheus metrics endpoint
 	s.BindHandler("/metrics", otelmetric.PrometheusHandler)
-	counter.Add(ctx, 1)
 
 	s.SetPort(8080)
 	s.Run()

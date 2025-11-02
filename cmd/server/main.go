@@ -53,25 +53,12 @@ func main() {
 			},
 		)
 	)
-	
+
 	s := g.Server()
 	// Root route for backward compatibility
 	s.BindHandler("/", func(r *ghttp.Request) {
 		g.Log().Info(r.Context(), "helworld")
-
-		counter.Add(r.Context(), 1)
-
-		gauge.Add(r.Context(), 10) // Add adds the given value to the counter. It panics if the value is < 0
-		gauge.Dec(r.Context())
-
-		histogram.Record(1)
-		histogram.Record(20)
-		histogram.Record(30)
-		histogram.Record(101)
-		histogram.Record(2000)
-		histogram.Record(9000)
-		histogram.Record(20000)
-
+		addMetricValue(r.Context(), counter, gauge, histogram)
 		r.Response.Write("hello from otel-go-webapp (goframe)")
 	})
 	// Hello World endpoint
@@ -96,4 +83,19 @@ func initMeterProvider() (func(context.Context) error, error) {
 	provider.SetAsGlobal()
 
 	return provider.Shutdown, nil
+}
+
+func addMetricValue(ctx context.Context, counter gmetric.Counter, gauge gmetric.UpDownCounter, histogram gmetric.Histogram) {
+	counter.Add(ctx, 1)
+
+	gauge.Add(ctx, 10) // Add adds the given value to the counter. It panics if the value is < 0
+	gauge.Dec(ctx)
+
+	histogram.Record(1)
+	histogram.Record(20)
+	histogram.Record(30)
+	histogram.Record(101)
+	histogram.Record(2000)
+	histogram.Record(9000)
+	histogram.Record(20000)
 }

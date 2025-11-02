@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -21,8 +23,7 @@ const (
 func main() {
 	var ctx = gctx.New()
 	glog.SetDefaultHandler(LoggingJsonHandler)
-
-	exporter, _ := prometheus.New(prometheus.WithTranslationStrategy(otlptranslator.UnderscoreEscapingWithSuffixes))
+	providerShutdown, _ := initMeterProvider()
 
 	var (
 		meter = gmetric.GetGlobalProvider().Meter(gmetric.MeterOption{
@@ -36,21 +37,41 @@ func main() {
 				Unit: "bytes",
 			},
 		)
+		gauge = meter.MustUpDownCounter(
+			"goframe.metric.demo.gauge",
+			gmetric.MetricOption{
+				Help: "This is a simple demo for UpDownCounter usage",
+				Unit: "%",
+			},
+		)
+		histogram = meter.MustHistogram(
+			"goframe.metric.demo.histogram",
+			gmetric.MetricOption{
+				Help:    "This is a simple demo for histogram usage",
+				Unit:    "ms",
+				Buckets: []float64{0, 10, 20, 50, 100, 500, 1000, 2000, 5000, 10000},
+			},
+		)
 	)
-
-	// OpenTelemetry provider.
-	provider := otelmetric.MustProvider(
-		otelmetric.WithReader(exporter),
-	)
-	provider.SetAsGlobal()
-	defer provider.Shutdown(ctx)
-
-	// Counter.
-
+	
 	s := g.Server()
 	// Root route for backward compatibility
 	s.BindHandler("/", func(r *ghttp.Request) {
 		g.Log().Info(r.Context(), "helworld")
+
+		counter.Add(r.Context(), 1)
+
+		gauge.Add(r.Context(), 10) // Add adds the given value to the counter. It panics if the value is < 0
+		gauge.Dec(r.Context())
+
+		histogram.Record(1)
+		histogram.Record(20)
+		histogram.Record(30)
+		histogram.Record(101)
+		histogram.Record(2000)
+		histogram.Record(9000)
+		histogram.Record(20000)
+
 		r.Response.Write("hello from otel-go-webapp (goframe)")
 	})
 	// Hello World endpoint
@@ -59,8 +80,20 @@ func main() {
 		r.Response.Write("hello world")
 	})
 	s.BindHandler("/metrics", otelmetric.PrometheusHandler)
-	counter.Add(ctx, 1)
 
 	s.SetPort(8080)
 	s.Run()
+
+	defer providerShutdown(ctx)
+}
+
+func initMeterProvider() (func(context.Context) error, error) {
+	exporter, _ := prometheus.New(prometheus.WithTranslationStrategy(otlptranslator.UnderscoreEscapingWithSuffixes))
+
+	provider := otelmetric.MustProvider(
+		otelmetric.WithReader(exporter),
+	)
+	provider.SetAsGlobal()
+
+	return provider.Shutdown, nil
 }

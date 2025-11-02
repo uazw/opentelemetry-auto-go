@@ -105,3 +105,14 @@ docker compose restart otel-collector
 - Metrics missing in collector output:
   - Ensure the app `/metrics` endpoint is reachable from the collector (host networking assumed); open `http://localhost:8080/metrics`.
   - Remember the OTTL filter drops `/metrics`-route telemetry from the pipelines by design.
+
+
+```bash
+docker run --rm --name jaeger \
+  -p 16686:16686 \
+  -p 4320:4317 \
+  -p 4321:4318 \
+  -p 5778:5778 \
+  -p 9411:9411 \
+  cr.jaegertracing.io/jaegertracing/jaeger:latest
+  ```

@@ -6,8 +6,8 @@ services:
       - ENV=dev
     ports:
       - "8080:8080"
-    depends_on:
-      - otel-collector
+    # depends_on:
+    #   - otel-collector
     network_mode: "host"
 
   otel-collector:
@@ -26,6 +26,7 @@ services:
     depends_on:
       - app
       - otel-collector
+      # - jaeger
     pid: "service:app"
     restart: unless-stopped
     privileged: true
@@ -38,7 +39,7 @@ services:
       - PERFMON
     environment:
       # Signal-specific endpoints and protocols to avoid ambiguous defaults
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4320
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_SERVICE_NAME=otel-go-webapp
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=dev
@@ -52,3 +53,13 @@ services:
       - /sys/fs/bpf:/sys/fs/bpf
       - /sys/kernel/tracing:/sys/kernel/tracing
     network_mode: "host"
+
+  # jaeger:
+  #   image: jaegertracing/all-in-one:latest
+  #   ports:
+  #     - "16686:16686"  # Jaeger UI
+  #     - "4317:4317"
+  #     - "4318:4318"
+  #     - "5778:5778"
+  #     - "9411:9411"
+    # network_mode: "host"

@@ -13,6 +13,10 @@ receivers:
 exporters:
   debug:
     verbosity: detailed
+  otlp/jaeger:
+    endpoint: "localhost:4320"
+    tls:
+      insecure: true
 processors:
 
   batch: {}
@@ -36,11 +40,12 @@ processors:
 
 service:
   pipelines:
-    metrics:
-      receivers: [prometheus_simple]
-      processors: [filter/ottl, batch]
-      exporters: [debug]
+    # metrics:
+    #   receivers: [prometheus_simple]
+    #   processors: [filter/ottl, batch]
+    #   exporters: [debug]
     traces:
       receivers: [otlp]
       processors: [filter/ottl, batch]
-      exporters: [debug]
+      exporters: [debug, otlp/jaeger]
+    

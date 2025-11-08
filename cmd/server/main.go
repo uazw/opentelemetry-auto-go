@@ -10,7 +10,9 @@ import (
 	"github.com/gogf/gf/v2/os/gmetric"
 	"github.com/prometheus/otlptranslator"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/prometheus"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/gogf/gf/contrib/metric/otelmetric/v2"
 	"go.opentelemetry.io/otel"
@@ -64,8 +66,19 @@ func main() {
 	})
 	// Hello World endpoint
 	s.BindHandler("/hello", func(r *ghttp.Request) {
+		traceSpan := trace.SpanFromContext(r.Context())
+		if traceSpan == nil {
+			g.Log().Warning(r.Context(), "traceSpan is nil")
+		} else {
+			traceSpan.AddEvent("sdfsdfssdfs")
+			traceSpan.SetAttributes(attribute.String("test", "uazw"))
+			g.Log().Info(r.Context(), "traceSpan is not nil")
+		}
+
+		g.Log().Warning(r.Context(), traceSpan)
+		response, _ := g.Client().Get(r.Context(), "http://localhost:8081/hello")
 		traceFirstOuter(r.Context())
-		r.Response.Write("hello world")
+		r.Response.Write(response.ReadAllString())
 	})
 	s.BindHandler("/metrics", otelmetric.PrometheusHandler)
 
@@ -101,10 +114,13 @@ func addMetricValue(ctx context.Context, counter gmetric.Counter, gauge gmetric.
 }
 
 func traceFirstOuter(ctx context.Context) {
+	ctx, s1 := otel.Tracer("sdf").Start(ctx, "1111", trace.WithSpanKind(trace.SpanKindInternal))
+	println("12313123")
+	defer s1.End()
 	tracer := otel.GetTracerProvider().Tracer(
 		"example-server",
 	)
-	ctx, span := tracer.Start(ctx, "outer-span")
+	ctx, span := tracer.Start(ctx, "outer-span", trace.WithSpanKind(trace.SpanKindInternal))
 	span.AddEvent("helelo")
 	traceInner(ctx)
 	defer span.End()
@@ -114,6 +130,7 @@ func traceInner(ctx context.Context) {
 	tracer := otel.GetTracerProvider().Tracer(
 		"example-server",
 	)
-	_, span := tracer.Start(ctx, "inner-span")
+	println("12313123")
+	_, span := tracer.Start(ctx, "inner-span", trace.WithSpanKind(trace.SpanKindInternal))
 	defer span.End()
 }

@@ -10,23 +10,23 @@ services:
     #   - otel-collector
     network_mode: "host"
 
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
-    ports:
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP gRPC
-    network_mode: "host"
+  # otel-collector:
+  #   image: otel/opentelemetry-collector-contrib:latest
+  #   command: ["--config=/etc/otel-collector-config.yaml"]
+  #   volumes:
+  #     - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+  #   ports:
+  #     - "4317:4317"   # OTLP gRPC
+  #     - "4318:4318"   # OTLP gRPC
+  #   network_mode: "host"
 
   # Go Auto-Instrumentation agent container that attaches to the app process
   otel-go-agent:
     image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:latest
     depends_on:
       - app
-      - otel-collector
-      # - jaeger
+      # - otel-collector
+      - jaeger
     pid: "service:app"
     restart: unless-stopped
     privileged: true
@@ -39,7 +39,7 @@ services:
       - PERFMON
     environment:
       # Signal-specific endpoints and protocols to avoid ambiguous defaults
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4320
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_SERVICE_NAME=otel-go-webapp
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=dev
@@ -54,12 +54,12 @@ services:
       - /sys/kernel/tracing:/sys/kernel/tracing
     network_mode: "host"
 
-  # jaeger:
-  #   image: jaegertracing/all-in-one:latest
-  #   ports:
-  #     - "16686:16686"  # Jaeger UI
-  #     - "4317:4317"
-  #     - "4318:4318"
-  #     - "5778:5778"
-  #     - "9411:9411"
-    # network_mode: "host"
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"
+      - "4318:4318"
+      - "5778:5778"
+      - "9411:9411"
+    network_mode: "host"

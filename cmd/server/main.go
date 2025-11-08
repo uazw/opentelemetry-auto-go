@@ -5,14 +5,12 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/net/gtrace"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gmetric"
 	"github.com/prometheus/otlptranslator"
 
 	"go.opentelemetry.io/otel/exporters/prometheus"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/gogf/gf/contrib/metric/otelmetric/v2"
 	"go.opentelemetry.io/otel"
@@ -103,19 +101,19 @@ func addMetricValue(ctx context.Context, counter gmetric.Counter, gauge gmetric.
 }
 
 func traceFirstOuter(ctx context.Context) {
-	currentSpan := trace.SpanFromContext(ctx)
-	traceId := currentSpan.SpanContext().TraceID()
-
-	g.Log().Info(ctx, "kkkkkkkkkkkkkkkkkkkkkk"+traceId.String())
-
-	tracer := otel.Tracer("example-server")
+	tracer := otel.GetTracerProvider().Tracer(
+		"example-server",
+	)
 	ctx, span := tracer.Start(ctx, "outer-span")
-	span.AddEvent("hhhhhhhhhhhhhhhhhhhhhhhhh")
+	span.AddEvent("helelo")
 	traceInner(ctx)
 	defer span.End()
 }
 
 func traceInner(ctx context.Context) {
-	_, span := gtrace.NewSpan(ctx, "inner-span")
+	tracer := otel.GetTracerProvider().Tracer(
+		"example-server",
+	)
+	_, span := tracer.Start(ctx, "inner-span")
 	defer span.End()
 }

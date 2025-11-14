@@ -47,5 +47,5 @@ service:
     traces:
       receivers: [otlp]
       processors: [filter/ottl, batch]
-      exporters: [debug, otlp/jaeger]
+      exporters: [debug]
     

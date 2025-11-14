@@ -13,6 +13,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/prometheus"
 
 	"github.com/gogf/gf/contrib/metric/otelmetric/v2"
+	"github.com/gogf/gf/contrib/trace/otlphttp/v2"
 	"go.opentelemetry.io/otel"
 )
 
@@ -21,8 +22,21 @@ const (
 	instrumentVersion = "v1.0"
 )
 
+const (
+	serviceName = "otlp-http-server" // Name of the service for tracing
+	endpoint    = "localhost:4318"   // Tracing endpoint
+	path        = "/v1/traces"       // Tracing path
+)
+
 func main() {
-	var ctx = gctx.New()
+	var (
+		ctx           = gctx.New()
+		shutdown, err = otlphttp.Init(serviceName, endpoint, path)
+	)
+	if err != nil {
+		g.Log().Fatal(ctx, err)
+	}
+	defer shutdown(ctx)
 	glog.SetDefaultHandler(LoggingJsonHandler)
 	providerShutdown, _ := initMeterProvider()
 

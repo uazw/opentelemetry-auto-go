@@ -40,10 +40,10 @@ processors:
 
 service:
   pipelines:
-    # metrics:
-    #   receivers: [prometheus_simple]
-    #   processors: [filter/ottl, batch]
-    #   exporters: [debug]
+    metrics:
+      receivers: [prometheus_simple]
+      processors: [filter/ottl, batch]
+      exporters: [debug]
     traces:
       receivers: [otlp]
       processors: [filter/ottl, batch]
